@@ -28,7 +28,7 @@ export default function Register({ setUser }) {
 
   const handleSubmit = async (values, { setSubmitting, setErrors, resetForm }) => {
     try {
-      const res = await axios.post(`${BASE_URl}/auth/signup`, values, {
+      const res = await axios.post(`${BASE_URL}/auth/signup`, values, {
         withCredentials: true,
       });
       toast.success("Registered Successfully")
