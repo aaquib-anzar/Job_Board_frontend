@@ -1,8 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Navbar from '../../job-board-frontend2/src/pages/Navbar';
 import Footer from './pages/Footer';
 import {Toaster} from "react-hot-toast"
+import Navbar from "../src/pages/Navbar"
 
 function App({ user, setUser }) {
   

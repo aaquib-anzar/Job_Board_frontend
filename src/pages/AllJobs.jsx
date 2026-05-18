@@ -13,46 +13,52 @@ export default function AllJobs({ user }) {
   const locationRef = useRef();
   const jobTypeRef = useRef();
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(false);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const fetchJobs = async (pageNum = 1) => {
+    setLoading(true)
     try {
       const payload = {
-        title: titleRef.current.value,
-        location: locationRef.current.value,
-        jobType: jobTypeRef.current.value,
+        title: titleRef.current?.value || "",
+        location: locationRef.current?.value || "",
+        jobType: jobTypeRef.current?.value || "",
+        page: pageNum,
+        limit: 9
       };
       const res = await axios.get(`${BASE_URL}/job/getjobs`, {
         params: payload,
         withCredentials: true,
       });
-      setJobs(res.data);
+      setJobs(res.data || res.data.jobs);
+      if(res.data.pages) setTotalPages(res.data.pages)
     } catch (error) {
       console.error("Error fetching jobs:", error);
     } finally {
       setLoading(false);
     }
   };
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setPage(1)
+    fetchJobs(1)
+  }
   const handleClear = async () => {
     try {
       titleRef.current.value = "";
       locationRef.current.value = "";
       jobTypeRef.current.value = "";
-      const res = await axios.get(`${BASE_URL}/job/getjobs`, {
-        withCredentials: true,
-      });
-      setJobs(res.data);
+      setPage(1);
+      fetchJobs(1);
     } catch (error) {
-      console.error("Clear filter error", error.message);
-    } finally {
-      setLoading(false);
+      console.error("Error clearing filters:", error);
     }
   };
   useEffect(() => {
-    handleClear();
-  }, []);
+    fetchJobs(page);
+  }, [page]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-12 max-w-7xl mx-auto">
@@ -92,7 +98,7 @@ export default function AllJobs({ user }) {
           <option value="">Select Job Type</option>
           <option value="full-time">Full-Time</option>
           <option value="part-time">Part-Time</option>
-          <option value="contract">Contact</option>
+          <option value="contract">Contract</option>
           <option value="internship">Internship</option>
           <option value="remote">Remote</option>
           <option value="hybrid">Hybrid</option>
@@ -144,8 +150,27 @@ export default function AllJobs({ user }) {
               </div>
             ))}
           </div>
+
+          {/*Pagination */}
+          <div className="flex justify-center items-center gap-4 mt-10">
+            <button 
+              onClick={() => setPage((p) => p - 1)}
+              disabled={page === 1}
+              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white font-semibold px-6 py-2 rounded-lg transition duration-300"
+            >
+              ← Previous
+            </button>
+            <span className="text-gray-400">Page {page} of {totalPages}</span>
+            <button 
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page === totalPages}
+              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white font-semibold px-6 py-2 rounded-lg transition duration-300"
+            >
+              Next →
+            </button>
+          </div>
         </section>
       )}
     </div>
   );
-}
+  }
